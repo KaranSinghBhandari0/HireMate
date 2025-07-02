@@ -24,18 +24,18 @@ export default function AllRoutes({ user }) {
             <Route path="/login" element={user ? <Home /> : <Login />} />
             <Route path="/profile" element={!user ? <Home /> : <Profile />} />
             <Route path="/profile/edit" element={!user ? <Home /> : <ProfileEdit />} />
-            <Route path="/subscription" element={!user ? <Home /> : <Subscription />} />
+            <Route path="/subscription" element={!user ? <Login /> : <Subscription />} />
 
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/job/:jobId" element={<JobDetails />} />
 
-            <Route path="/interview-history" element={!user ? <Home /> : <InterviewHistory />} />
-            <Route path="/interview/:jobId" element={!user ? <Home /> : <Interview />} />
-            <Route path="/feedback/:id" element={!user ? <Home /> : <Feedback />} />
+            <Route path="/interview-history" element={!user ? <Login /> : <InterviewHistory />} />
+            <Route path="/interview/:jobId" element={!user ? <Login /> : <Interview />} />
+            <Route path="/feedback/:id" element={!user ? <Login /> : <Feedback />} />
 
-            <Route path="/admin-dashboard" element={!user ? <Home /> : <AdminDashboard />} />
-            <Route path="/add-job" element={!user ? <Home /> : <AddJob />} />
-            <Route path="/edit-job/:jobId" element={!user ? <Home /> : <EditJob />} />
+            <Route path="/admin-dashboard" element={!user ? <Login /> : <AdminDashboard />} />
+            <Route path="/add-job" element={!user ? <Login /> : <AddJob />} />
+            <Route path="/edit-job/:jobId" element={!user ? <Login /> : <EditJob />} />
 
             <Route path="*" element={<PageNotFound />} />
         </Routes>

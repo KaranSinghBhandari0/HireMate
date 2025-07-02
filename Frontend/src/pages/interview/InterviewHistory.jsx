@@ -22,7 +22,7 @@ export default function InterviewHistory() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
                 <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                    <h2 className="text-2xl font-semibold text-gray-900">
                         Interview History
                     </h2>
                     <p className="text-sm text-gray-500">

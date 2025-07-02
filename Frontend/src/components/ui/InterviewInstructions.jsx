@@ -37,7 +37,7 @@ export default function InterviewInstructions({
             <div className="bg-white shadow-xl rounded-xl w-full max-w-3xl p-4 sm:p-8">
                 {/* Header */}
                 <div className="flex justify-between sm:items-center border-b mb-6 gap-2">
-                    <h2 className="text-base sm:text-2xl font-bold text-gray-900 pb-1 sm:pb-3">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 pb-1 sm:pb-3">
                         Interview Instructions
                     </h2>
                     <X

@@ -137,7 +137,7 @@ export default function Interview() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
                 <div>
-                    <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                         Interview Practice
                     </h1>
                     <p className="text-sm sm:text-base text-gray-600">

@@ -92,7 +92,7 @@ export default function Feedback() {
         return (
             <div className="bg-white p-6 rounded-xl shadow-md border">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Summary</h2>
-                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                <ul className="text-sm sm:text-base list-disc list-inside space-y-1 text-gray-700">
                     {feedback.summary.map((point, idx) => (
                         <li key={idx}>{point}</li>
                     ))}
@@ -126,7 +126,7 @@ export default function Feedback() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-b pb-6">
                 <div>
-                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Interview Feedback</h1>
+                    <h1 className="text-3xl font-semibold text-gray-900">Interview Feedback</h1>
                     <p className="text-sm text-gray-500 mt-1">
                         <span className='mr-1 font-medium'> {feedback.job.title} </span>
                         at
