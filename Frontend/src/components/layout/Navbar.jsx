@@ -113,6 +113,8 @@ export default function Navbar() {
                                 </button>
                             )
                         )}
+                        {
+                        user && 
                         <Link
                             to="/interview-history"
                             className="text-gray-600 hover:text-green-500"
@@ -123,15 +125,16 @@ export default function Navbar() {
                         >
                             Interview History
                         </Link>
+                        }
                         <Link
                             to="/admin-dashboard"
-                            className="text-gray-600 hover:text-green-500 flex items-center gap-1"
+                            className="text-gray-600 hover:text-green-500"
                             onClick={() => {
                                 closeMenu();
                                 scrollToTop();
                             }}
                         >
-                            <Settings size={16} /> Admin
+                            Admin
                         </Link>
                     </div>
 
@@ -142,7 +145,7 @@ export default function Navbar() {
                                 <Link to="/profile" className="text-center text-gray-600 hover:text-green-500" onClick={closeMenu}>
                                     Profile
                                 </Link>
-                                <button className="text-red-500 bg-red-100 font-medium py-2 px-4 rounded-md" onClick={()=> { logout, closeMenu }}>
+                                <button className="text-red-500 bg-red-100 font-medium py-2 px-4 rounded-md" onClick={()=> { logout(), closeMenu() }}>
                                     Logout
                                 </button>
                             </>

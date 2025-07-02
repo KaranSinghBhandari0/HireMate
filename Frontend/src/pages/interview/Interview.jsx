@@ -135,13 +135,17 @@ export default function Interview() {
     return (
         <div className="min-h-screen max-w-7xl mx-auto p-6">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Interview Practice</h1>
-                    <p className="text-gray-600 text-sm">{job.title} at {job.company}</p>
+                    <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+                        Interview Practice
+                    </h1>
+                    <p className="text-sm sm:text-base text-gray-600">
+                        {job.title} at {job.company}
+                    </p>
                 </div>
                 <button
-                    className="border border-green-500 text-green-600 text-sm font-medium px-4 py-2 rounded-md hover:bg-green-100"
+                    className="w-full sm:w-auto border border-green-500 text-green-600 text-sm font-medium px-4 py-2 rounded-md hover:bg-green-100 transition"
                     onClick={() => setReadInstructions(false)}
                 >
                     View Instructions

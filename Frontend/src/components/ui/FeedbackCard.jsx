@@ -20,7 +20,7 @@ export default function FeedbackCard({ feedback }) {
                 <Briefcase size={20} className="text-gray-500 mt-1" />
                 <div className='w-full'>
                     <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-800">
+                        <p className="font-semibold text-sm sm:text-base text-gray-800">
                             {job?.title || "Untitled Role"}
                         </p>
                         <span className="bg-orange-400 text-xs px-2 py-0.5 rounded-full text-gray-800">

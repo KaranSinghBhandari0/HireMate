@@ -28,3 +28,19 @@ body {
 .fade-up {
     animation: fadeUp 0.8s ease-out forwards;
 }
+
+/* Remove autofill background color */
+input:-webkit-autofill {
+    background-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    box-shadow: 0 0 0px 1000px white inset !important;
+    color: #374151 !important;
+    -webkit-text-fill-color: #374151 !important;
+}
+
+/* Ensures background remains white even on focus */
+input:-webkit-autofill:focus {
+    background-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    box-shadow: 0 0 0px 1000px white inset !important;
+}

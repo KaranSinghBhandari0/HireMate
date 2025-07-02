@@ -78,16 +78,12 @@ const signup = async (req, res) => {
 
         // Check if passwords match
         if (password.length < 6) {
-            return res
-                .status(400)
-                .json({ message: "Password must contains atleast 6 characters" });
+            return res.status(400).json({ message: "Password must contains atleast 6 characters" });
         }
 
         // Check if passwords match
         if (password !== confirmPassword) {
-            return res
-                .status(400)
-                .json({ message: "Password & confirm password must match" });
+            return res.status(400).json({ message: "Password & confirm password must match" });
         }
 
         // Hash the password
@@ -114,61 +110,6 @@ const signup = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Server error", error: error.message });
-    }
-};
-
-const sendOtp = async (req, res) => {
-    try {
-        const { email } = req.body;
-
-        if(!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
-
-        const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
-
-        // Remove existing OTPs for this email
-        await OTP.deleteMany({ email });
-
-        // Save to DB
-        await OTP.create({ email, otp });
-
-        // Send email
-        await transporter.sendMail({
-            from: `"HireMentis" <${process.env.MAIL_USER}>`,
-            to: email,
-            subject: "Your OTP Code",
-            text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
-        });
-
-        return res.status(200).json({ message: "OTP sent successfully" });
-    } catch (error) {
-        console.error("Error sending OTP:", error);
-        return res.status(500).json({ message: "Failed to send OTP" });
-    }
-};
-
-const verifyOtp = async (req, res) => {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-        return res.status(400).json({ message: "Email and OTP are required" });
-    }
-
-    try {
-        const otpRecord = await OTP.findOne({ email, otp });
-
-        if (!otpRecord) {
-            return res.status(400).json({ message: "Invalid or expired OTP" });
-        }
-
-        // OTP is valid
-        await OTP.deleteMany({ email }); // remove used OTPs
-
-        res.status(200).json({ message: "OTP verified successfully" });
-    } catch (error) {
-        console.error("Error verifying OTP:", error);
-        res.status(500).json({ message: "Failed to verify OTP" });
     }
 };
 
@@ -289,4 +230,4 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { signup, login, logout, checkAuth, updateProfile, sendOtp, verifyOtp };
+module.exports = { signup, login, logout, checkAuth, updateProfile };
