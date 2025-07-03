@@ -72,7 +72,7 @@ export default function AdminDashboard() {
                                 <h2 className='text-lg font-semibold text-gray-900'>{job.title}</h2>
                                 <p className='text-sm text-gray-600'>{job.company}</p>
                                 <p className='text-sm text-gray-500'>
-                                    <span className='font-medium'>Job ID:</span> {job._id}
+                                    <span className='font-medium'>Job ID:</span> Job{job._id.slice(-4)}
                                 </p>
                             </div>
                         </Link>
