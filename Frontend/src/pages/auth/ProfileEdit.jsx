@@ -55,7 +55,7 @@ export default function ProfileEdit() {
 
         setLoading(true);
         await updateProfile(formData);
-        setLoading(true);
+        setLoading(false);
     };
 
     return (

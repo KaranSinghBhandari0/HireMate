@@ -1,117 +1,10 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
-const OTP = require("../models/OTP");
 const jwt = require("jsonwebtoken");
+const OTP = require("../models/OTP");
+const User = require("../models/User");
 const cloudinary = require("../lib/cloudConfig");
 const transporter = require('../lib/transporter');
-
-// ------- Helper Functions -------
-
-// cookies option
-const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-};
-
-// Token renewal logic
-const autoRenewalToken = async (user) => {
-    const MILLISECONDS_IN_28_DAYS = 28 * 24 * 60 * 60 * 1000;
-
-    if (user.tokens === 0 && user.tokenUsedAt) {
-        const timePassed = Date.now() - new Date(user.tokenUsedAt).getTime();
-        if (timePassed >= MILLISECONDS_IN_28_DAYS) {
-            user.tokens = 1;
-            user.tokenUsedAt = null;
-            await user.save();
-        }
-    }
-}
-
-// Clean helper
-const clean = (val) => {
-    if (val === undefined || val === null) return null;
-    if (typeof val === "string") {
-        const trimmed = val.trim();
-        return trimmed === "" || trimmed === "null" || trimmed === "undefined"
-            ? null
-            : trimmed;
-    }
-    return val;
-};
-
-// Validation helper
-const checkValidations = ({ firstName, phoneNumber, dob, experience }) => {
-    if (!firstName) {
-        return "First name cannot be empty";
-    }
-    if (phoneNumber && !/^\d{10}$/.test(phoneNumber)) {
-        return "Invalid phone number";
-    }
-    if (dob && new Date(dob) > new Date()) {
-        return "Date of birth cannot be in the future";
-    }
-    if (experience !== null && (isNaN(experience) || Number(experience) < 0)) {
-        return "Experience must be a non-negative number";
-    }
-    return null;
-};
-
-
-// ------- Controller Functions -------
-const signup = async (req, res) => {
-    try {
-        let { firstName, lastName, email, password, confirmPassword } = req.body;
-        // Trim input values
-        firstName = firstName.trim();
-        lastName = lastName.trim();
-        email = email.trim();
-        password = password.trim();
-        confirmPassword = confirmPassword.trim();
-
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "Email already exists!" });
-        }
-
-        // Check if passwords match
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password must contains atleast 6 characters" });
-        }
-
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            return res.status(400).json({ message: "Password & confirm password must match" });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create new user
-        const user = new User({
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword,
-        });
-        await user.save();
-
-        // Generate JWT token
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "7d",
-        });
-
-        // Store token in cookie
-        res.cookie("token", token, cookieOptions);
-
-        res.status(200).json({ message: "Signup successful", user });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
-};
+const { cookieOptions, autoRenewalToken, clean, profileValidations, signupValidations } = require('../lib/helper');
 
 const login = async (req, res) => {
     try {
@@ -191,7 +84,7 @@ const updateProfile = async (req, res) => {
         if (experience !== null) experience = Number(experience);
 
         // Validations
-        const error = checkValidations({ firstName, phoneNumber, dob, experience });
+        const error = profileValidations({ firstName, phoneNumber, dob, experience });
         if (error) {
             return res.status(400).json({ message: error });
         }
@@ -230,4 +123,120 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { signup, login, logout, checkAuth, updateProfile };
+const sendOtp = async (req,res) => {
+    try {
+        let { email, firstName, lastName, password } = req.body;
+
+        if(!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const error = await signupValidations(req.body);    // Cheking signup Validations
+        if(error) {
+            return res.status(400).json({ message: error });
+        }
+
+        const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+
+        await OTP.deleteMany({ email });    // Remove existing OTPs for this email
+
+        const hashedPassword = await bcrypt.hash(password, 10); 
+
+        await OTP.create({ 
+            email, 
+            otp,
+            signupData : {
+                firstName,
+                lastName,
+                password: hashedPassword
+            }
+        });
+
+        // Send email
+        await transporter.sendMail({
+            from: `"HireMentis" <${process.env.MAIL_USER}>`,
+            to: email,
+            subject: "Your OTP Code",
+            text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+        });
+
+        return res.status(200).json({ message: "OTP sent successfully" });
+    } catch (error) {
+        console.error("Error sending OTP:", error);
+        return res.status(500).json({ message: "Failed to send OTP" });
+    }
+}
+
+const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if(!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" });
+        }
+
+        const otpRecord = await OTP.findOne({ email, otp });
+        if(!otpRecord) {
+            return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+
+        const { firstName, lastName, password } = otpRecord.signupData;
+
+        // Create actual user
+        const newUser = await User.create({
+            firstName,
+            lastName,
+            email,
+            password,
+        });
+
+        // Generate JWT token & store in cookies
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        res.cookie("token", token, cookieOptions);
+
+        await OTP.deleteMany({ email }); // Clean used OTP
+
+        return res.status(200).json({ message: "Signup successful", user: newUser });
+    } catch (error) {
+        console.error("Error verifying OTP:", error);
+        return res.status(500).json({ message: "Failed to verify OTP" });
+    }
+};
+
+const reSendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        // Check if OTP record exists
+        const otpRecord = await OTP.findOne({ email });
+        if (!otpRecord) {
+            return res.status(400).json({ message: "Session timed out. Please sign up again." });
+        }
+
+        // Generate a new OTP
+        const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
+
+        // Update OTP record
+        otpRecord.otp = newOtp;
+        await otpRecord.save();
+
+        // Send new OTP email
+        await transporter.sendMail({
+            from: `"HireMentis" <${process.env.MAIL_USER}>`,
+            to: email,
+            subject: "Your New OTP Code",
+            text: `Your new OTP code is ${newOtp}. It will expire in 5 minutes.`,
+        });
+
+        return res.status(200).json({ message: "New OTP sent successfully" });
+    } catch (error) {
+        console.error("Error resending OTP:", error);
+        return res.status(500).json({ message: "Failed to resend OTP" });
+    }
+};
+
+module.exports = { login, logout, checkAuth, updateProfile, sendOtp, verifyOtp, reSendOtp };

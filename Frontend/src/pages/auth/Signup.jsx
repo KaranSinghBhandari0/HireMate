@@ -4,6 +4,7 @@ import { Eye, EyeOff, Lock } from "lucide-react";
 import { AuthContext } from "../../context/AuthContext";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
+import OtpModal from "../../components/common/OtpModal";
 
 export default function Signup() {
     const { signup } = useContext(AuthContext);
@@ -147,6 +148,8 @@ export default function Signup() {
                     </Link>
                 </p>
             </div>
+
+            <OtpModal />
         </div>
     );
 }

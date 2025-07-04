@@ -17,12 +17,14 @@ const upload = multer({
     },
 });
 
-const { signup, login, logout, checkAuth, updateProfile } = require('../controllers/auth');
+const { login, logout, checkAuth, updateProfile, sendOtp, verifyOtp, reSendOtp } = require('../controllers/auth');
 
-router.post("/signup", signup);
 router.post("/login", login);
 router.get("/logout", logout);
 router.get("/checkAuth", isAuthenticated, checkAuth);
 router.put("/update-profile", isAuthenticated, upload.single('image'), updateProfile);
+router.post("/send-otp", sendOtp);
+router.post("/verify-otp", verifyOtp);
+router.post("/resend-otp", reSendOtp);
 
 module.exports = router;

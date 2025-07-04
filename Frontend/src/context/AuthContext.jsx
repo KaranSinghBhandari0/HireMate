@@ -9,6 +9,8 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
+    const [otpModal, setOtpModal] = useState(false);
+    const [tempEmail, setTempEmail] = useState('');
 
     // Check authentication
     const checkAuth = async () => {
@@ -25,10 +27,10 @@ export const AuthProvider = ({ children }) => {
     // signup
     const signup = async (formData) => {
         try {
-            const res = await axiosInstance.post('/auth/signup', formData);
-            setUser(res.data.user);
+            const res = await axiosInstance.post('/auth/send-otp', formData);
             toast.success(res.data.message);
-            navigate('/profile');
+            setOtpModal(true);
+            setTempEmail(formData.email);
         } catch (error) {
             console.log(error);
             toast.error(error.response?.data?.message || "Server Error");
@@ -75,10 +77,35 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const verifyOtp = async (otp) => {
+        try {
+            const res = await axiosInstance.post('/auth/verify-otp', { email: tempEmail, otp });
+            toast.success(res.data.message);
+            setOtpModal(false);
+            setUser(res.data.user);
+            setOtpModal(false);
+            navigate('/profile');
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response?.data?.message || "Server Error");
+        }
+    }
+
+    const reSendOtp = async () => {
+        try {
+            const res = await axiosInstance.post('/auth/resend-otp', { email: tempEmail});
+            toast.success(res.data.message);
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response?.data?.message || "Server Error");
+        }
+    }
+
     return (
         <AuthContext.Provider value={{
             user, setUser, checkingAuth,
             signup, login, logout, checkAuth, updateProfile,
+            otpModal, setOtpModal, verifyOtp, reSendOtp
         }}>
             {children}
         </AuthContext.Provider>

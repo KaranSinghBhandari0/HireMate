@@ -54,9 +54,9 @@ export default function Profile() {
                         <ReadOnlyField label="Email" value={email} />
                         <ReadOnlyField label="Phone Number" value={phoneNumber || "-"} />
                         <ReadOnlyField label="Address" value={address || "-"} />
-                        <ReadOnlyField label="Date of Birth" value={formatToDDMMYY(new Date(dob))} />
+                        <ReadOnlyField label="Date of Birth" value={dob ? formatToDDMMYY(new Date(dob)) : "-"} />
                         <ReadOnlyField label="Role" value={role || "-"} />
-                        <ReadOnlyField label="Experience" value={ experience || "0"} />
+                        <ReadOnlyField label="Experience" value={ experience || "-"} />
                     </div>
                 </div>
             </div>
