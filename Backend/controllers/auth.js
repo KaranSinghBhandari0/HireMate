@@ -132,7 +132,7 @@ const sendOtp = async (req,res) => {
         }
 
         // This is for signup only
-        if(firstName && lastName && password) {
+        if(firstName && password) {
             const error = await signupValidations(req.body);    // Cheking signup Validations
             if(error) {
                 return res.status(400).json({ message: error });
