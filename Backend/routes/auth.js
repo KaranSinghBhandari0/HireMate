@@ -17,7 +17,7 @@ const upload = multer({
     },
 });
 
-const { login, logout, checkAuth, updateProfile, sendOtp, verifyOtp, reSendOtp } = require('../controllers/auth');
+const { login, logout, checkAuth, updateProfile, sendOtp, verifyOtp, reSendOtp, resetPassword } = require('../controllers/auth');
 
 router.post("/login", login);
 router.get("/logout", logout);
@@ -26,5 +26,6 @@ router.put("/update-profile", isAuthenticated, upload.single('image'), updatePro
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
 router.post("/resend-otp", reSendOtp);
+router.put("/reset-password", resetPassword);
 
 module.exports = router;

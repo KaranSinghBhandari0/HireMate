@@ -131,34 +131,53 @@ const sendOtp = async (req,res) => {
             return res.status(400).json({ message: "Email is required" });
         }
 
-        const error = await signupValidations(req.body);    // Cheking signup Validations
-        if(error) {
-            return res.status(400).json({ message: error });
-        }
-
-        const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
-
-        await OTP.deleteMany({ email });    // Remove existing OTPs for this email
-
-        const hashedPassword = await bcrypt.hash(password, 10); 
-
-        await OTP.create({ 
-            email, 
-            otp,
-            signupData : {
-                firstName,
-                lastName,
-                password: hashedPassword
+        // This is for signup only
+        if(firstName && lastName && password) {
+            const error = await signupValidations(req.body);    // Cheking signup Validations
+            if(error) {
+                return res.status(400).json({ message: error });
             }
-        });
 
-        // Send email
-        await transporter.sendMail({
-            from: `"HireMentis" <${process.env.MAIL_USER}>`,
-            to: email,
-            subject: "Your OTP Code",
-            text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
-        });
+            const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+
+            await OTP.deleteMany({ email });    // Remove existing OTPs for this email
+
+            const hashedPassword = await bcrypt.hash(password, 10); 
+
+            await OTP.create({ 
+                email, 
+                otp,
+                signupData : {
+                    firstName,
+                    lastName,
+                    password: hashedPassword
+                }
+            });
+
+            // Send email
+            await transporter.sendMail({
+                from: `"HireMentis" <${process.env.MAIL_USER}>`,
+                to: email,
+                subject: "Your OTP Code",
+                text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+            });
+        } else {
+            const otp = Math.floor(1000 + Math.random() * 9000).toString();
+            await OTP.deleteMany({ email });
+
+            await OTP.create({ 
+                email, 
+                otp
+            });
+
+            // Send email
+            await transporter.sendMail({
+                from: `"HireMentis" <${process.env.MAIL_USER}>`,
+                to: email,
+                subject: "Your OTP Code",
+                text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+            });
+        }
 
         return res.status(200).json({ message: "OTP sent successfully" });
     } catch (error) {
@@ -171,18 +190,28 @@ const verifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        if(!email || !otp) {
+        if (!email || !otp) {
             return res.status(400).json({ message: "Email and OTP are required" });
         }
 
         const otpRecord = await OTP.findOne({ email, otp });
-        if(!otpRecord) {
+        if (!otpRecord) {
             return res.status(400).json({ message: "Invalid or expired OTP" });
         }
 
+        // Case 1: Reset password or generic OTP verification (no signup)
+        if (!otpRecord.signupData || !otpRecord.signupData.firstName || !otpRecord.signupData.password) {
+            await OTP.deleteMany({ email });
+            return res.status(200).json({ message: "OTP Verification successful" });
+        }
+
+        // Case 2: Signup with OTP
         const { firstName, lastName, password } = otpRecord.signupData;
 
-        // Create actual user
+        if (!firstName || !password) {
+            return res.status(400).json({ message: "Signup data incomplete. Please try again." });
+        }
+
         const newUser = await User.create({
             firstName,
             lastName,
@@ -190,11 +219,10 @@ const verifyOtp = async (req, res) => {
             password,
         });
 
-        // Generate JWT token & store in cookies
         const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.cookie("token", token, cookieOptions);
 
-        await OTP.deleteMany({ email }); // Clean used OTP
+        await OTP.deleteMany({ email });
 
         return res.status(200).json({ message: "Signup successful", user: newUser });
     } catch (error) {
@@ -239,4 +267,33 @@ const reSendOtp = async (req, res) => {
     }
 };
 
-module.exports = { login, logout, checkAuth, updateProfile, sendOtp, verifyOtp, reSendOtp };
+const resetPassword = async (req, res) => {
+    try {
+        let { email, newPassword } = req.body;
+
+        if (!email || !newPassword) {
+            return res.status(400).json({ message: "Email and new password are required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "No user is registered with this email" });
+        }
+
+        newPassword = newPassword.trim();
+        if(newPassword.length < 6) {
+            return res.status(400).json({ message: "Password must contains atleast 6 characters"})
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        console.error("Error resetting password:", error);
+        return res.status(500).json({ message: "Failed to reset password" });
+    }
+};
+
+module.exports = { login, logout, checkAuth, updateProfile, sendOtp, verifyOtp, reSendOtp, resetPassword };

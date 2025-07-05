@@ -52,9 +52,10 @@ export default function OtpModal() {
         }
     };
 
-    const handleSubmitOtp = () => {
+    const handleSubmitOtp = async () => {
         const enteredOtp = otp.join('');
-        verifyOtp(enteredOtp);
+        await verifyOtp(enteredOtp);
+        setOtp(['', '', '', '']); // clear input
     };
 
     const handleResendOtp = async () => {

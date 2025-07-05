@@ -15,6 +15,7 @@ import AddJob from '../pages/admin/AddJob';
 import EditJob from '../pages/admin/EditJob';
 import PageNotFound from '../pages/misc/PageNotFound';
 import Subscription from '../pages/auth/Subscription';
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 
 export default function AllRoutes({ user }) {
     return (
@@ -36,6 +37,8 @@ export default function AllRoutes({ user }) {
             <Route path="/admin-dashboard" element={!user ? <Login /> : <AdminDashboard />} />
             <Route path="/add-job" element={!user ? <Login /> : <AddJob />} />
             <Route path="/edit-job/:jobId" element={!user ? <Login /> : <EditJob />} />
+
+            <Route path="/reset-password" element={user ? <Home /> : <ResetPasswordPage />} />
 
             <Route path="*" element={<PageNotFound />} />
         </Routes>

@@ -1,12 +1,12 @@
+require('dotenv').config({ path: '../.env' });
 const mongoose = require("mongoose");
 const Job = require("../models/Job");
-let DB_url = process.env.DB_URL;
 
 const jobs = [
     {
         title: "Software Developer",
         company: "Tata Consultancy Services",
-        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Tata_Consultancy_Services_Logo.svg/1200px-Tata_Consultancy_Services_Logo.svg.png",
+        companyLogo: "https://brandlogos.net/wp-content/uploads/2022/04/tata_consultancy_services-logo-brandlogos.net_-768x768.png",
         location: "Bangalore, India",
         description: "Develop and maintain software applications for TCS clients across various industries.",
         experience: "0-2 years",
@@ -27,7 +27,7 @@ const jobs = [
     {
         title: "Product Manager",
         company: "Flipkart",
-        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flipkart_logo.png/800px-Flipkart_logo.png",
+        companyLogo: "https://brandlogos.net/wp-content/uploads/2025/02/flipkart_icon-logo_brandlogos.net_uh1az-768x762.png",
         location: "Bengaluru, India",
         description: "Drive product vision and strategy for Flipkart's e-commerce platform.",
         experience: "3-5 years",
@@ -90,7 +90,7 @@ const jobs = [
     {
         title: "DevOps Engineer",
         company: "Jio Platforms",
-        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Jio_Logo.svg/1200px-Jio_Logo.svg.png",
+        companyLogo: "https://brandlogos.net/wp-content/uploads/2023/08/jio-logo_brandlogos.net_s9dim-512x512.png",
         location: "Mumbai, India",
         description: "Build and maintain CI/CD pipelines for Jio's digital services platform.",
         experience: "2-5 years",
@@ -132,7 +132,7 @@ const jobs = [
     {
         title: "Cybersecurity Analyst",
         company: "Wipro",
-        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Wipro_Logo.svg/1200px-Wipro_Logo.svg.png",
+        companyLogo: "https://brandlogos.net/wp-content/uploads/2022/04/wipro-logo-brandlogos.net_-512x512.png",
         location: "Pune, India",
         description: "Protect Wipro's systems and client data from security threats.",
         experience: "2-4 years",
@@ -174,7 +174,7 @@ const jobs = [
     {
         title: "Mobile App Developer",
         company: "BYJU'S",
-        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Byju%27s_logo.svg/1200px-Byju%27s_logo.svg.png",
+        companyLogo: "https://brandlogos.net/wp-content/uploads/2022/07/byjus-logo_brandlogos.net_hbf6z-512x512.png",
         location: "Bangalore, India",
         description: "Develop and maintain BYJU'S educational mobile applications.",
         experience: "1-3 years",
@@ -195,7 +195,7 @@ const jobs = [
     {
         title: "Cloud Architect",
         company: "HCL Technologies",
-        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/HCL_logo.svg/1200px-HCL_logo.svg.png",
+        companyLogo: "https://brandlogos.net/wp-content/uploads/2013/03/hcl-technologies-vector-logo.png",
         location: "Chennai, India",
         description: "Design and implement cloud solutions for HCL's enterprise clients.",
         experience: "5-8 years",
@@ -216,7 +216,7 @@ const jobs = [
 ];
 
 mongoose
-    .connect(DB_url)
+    .connect(process.env.DB_URL)
     .then(() => {
         console.log("Connected to MongoDB");
         return Job.insertMany(jobs);

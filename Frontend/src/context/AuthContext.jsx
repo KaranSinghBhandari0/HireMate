@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
     const [otpModal, setOtpModal] = useState(false);
+    const [otpVerified, setOtpVerified] = useState(false);
     const [tempEmail, setTempEmail] = useState('');
 
     // Check authentication
@@ -82,9 +83,11 @@ export const AuthProvider = ({ children }) => {
             const res = await axiosInstance.post('/auth/verify-otp', { email: tempEmail, otp });
             toast.success(res.data.message);
             setOtpModal(false);
-            setUser(res.data.user);
-            setOtpModal(false);
-            navigate('/profile');
+            setOtpVerified(true);
+            if(res.data.user) {
+                setUser(res.data.user);
+                navigate('/profile');
+            }
         } catch (error) {
             console.log(error);
             toast.error(error.response?.data?.message || "Server Error");
@@ -101,11 +104,24 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const resetPassword = async ({ email, newPassword }) => {
+        try {
+            const res = await axiosInstance.put('/auth/reset-password', { email, newPassword });
+            toast.success(res.data.message);
+            setOtpVerified(false);
+            navigate('/login');
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response?.data?.message || "Server Error");
+        }
+    };
+
     return (
         <AuthContext.Provider value={{
             user, setUser, checkingAuth,
             signup, login, logout, checkAuth, updateProfile,
-            otpModal, setOtpModal, verifyOtp, reSendOtp
+            otpModal, setOtpModal, verifyOtp, reSendOtp,
+            resetPassword, otpVerified, setOtpVerified
         }}>
             {children}
         </AuthContext.Provider>
